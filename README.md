@@ -7,36 +7,51 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
     <style>
-        body { background: #050505; color: #00ffcc; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; overflow: hidden; }
+        body { background: #050505; color: #00ffcc; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
         .machine { background: #111; padding: 20px; border: 4px solid #00ffcc; border-radius: 25px; display: inline-block; width: 90%; max-width: 380px; box-shadow: 0 0 30px #00ffcc44; }
         .display { font-size: 35px; background: #000; padding: 20px; border-radius: 15px; margin: 15px 0; border: 2px solid #333; color: white; }
+        .btn-web3 { background: #8257e5; color: #fff; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; font-size: 16px; margin-bottom: 15px; box-shadow: 0 4px #5a3ba3; }
+        .btn-web3:active { transform: translateY(2px); box-shadow: 0 2px #5a3ba3; }
         .btn-spin { background: #00ffcc; color: #000; border: none; padding: 18px; border-radius: 15px; font-weight: bold; font-size: 18px; width: 100%; cursor: pointer; }
         .btn-spin:disabled { background: #333; color: #666; }
-        #status { font-size: 10px; margin-bottom: 10px; color: #888; word-break: break-all; }
+        #status { font-size: 10px; margin-bottom: 10px; color: #888; }
     </style>
 </head>
 <body>
     <div class="machine">
-        <button id="connectBtn" style="width:100%; padding:10px; margin-bottom:10px; border-radius:10px; background:#8257e5; color:white; border:none; font-weight:bold;" onclick="connect()">CONNECT WALLET</button>
-        <div id="status">Not Connected</div>
+        <button id="connectBtn" class="btn-web3" onclick="connect()">🔌 CONNECT WALLET</button>
+        <div id="status">Status: Disconnected</div>
+
         <h1 style="margin:0; font-size: 20px;">CHAMELEON ROYAL</h1>
         <div id="slot" class="display">🦎 | 💎 | 💰</div>
-        <button id="spinBtn" class="btn-spin" onclick="play()" disabled>CONNECT TO PLAY</button>
-        <p style="font-size:10px; margin-top:10px;">BET COST: 0.005 SOL</p>
-        <div id="log" style="font-size:12px; margin-top:5px;"></div>
+        
+        <button id="spinBtn" class="btn-spin" onclick="play()" disabled>CONNECT TO SPIN</button>
+        <p style="font-size:10px; margin-top:10px;">COST: 0.005 SOL</p>
     </div>
+
     <script>
         const BANK_WALLET = "EsT69DqDkqXp4Y6zR6B2S7yq7m8m9NJTc"; 
         let userWallet = null;
+
         async function connect() {
-            if (window.solana) {
-                const resp = await window.solana.connect();
-                userWallet = resp.publicKey;
-                document.getElementById('status').innerText = "Connected: " + userWallet.toString().slice(0,8) + "...";
-                document.getElementById('spinBtn').disabled = false;
-                document.getElementById('spinBtn').innerText = "SPIN (0.005 SOL)";
-            } else { alert("Open in Brave/Phantom Browser!"); }
+            // Se o usuário estiver no Brave/Phantom
+            if (window.solana || window.phantom) {
+                try {
+                    const resp = await window.solana.connect();
+                    userWallet = resp.publicKey;
+                    document.getElementById('status').innerText = "Wallet: " + userWallet.toString().slice(0,8) + "...";
+                    document.getElementById('connectBtn').innerText = "✅ CONNECTED";
+                    document.getElementById('connectBtn').style.background = "#00ffcc";
+                    document.getElementById('connectBtn').style.color = "#000";
+                    document.getElementById('spinBtn').disabled = false;
+                    document.getElementById('spinBtn').innerText = "SPIN NOW (0.005 SOL)";
+                } catch (err) { alert("Connection denied!"); }
+            } else {
+                // Se o cara abrir no Chrome/WhatsApp, ele recebe esse aviso:
+                alert("❌ Wallet not found! Please open this link inside the Phantom or Brave browser app.");
+            }
         }
+
         async function play() {
             try {
                 const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'));
@@ -49,11 +64,13 @@
                 );
                 const { signature } = await window.solana.signAndSendTransaction(transaction);
                 document.getElementById('spinBtn').disabled = true;
-                document.getElementById('log').innerText = "SENDING TO BANK...";
+                document.getElementById('spinBtn').innerText = "WAITING SOL...";
+                
                 setTimeout(() => {
                     document.getElementById('slot').innerText = "🦎 | 🦎 | 🦎";
-                    document.getElementById('log').innerText = "JACKPOT! Payment confirmed.";
+                    alert("JACKPOT! You won the spin.");
                     document.getElementById('spinBtn').disabled = false;
+                    document.getElementById('spinBtn').innerText = "SPIN AGAIN";
                 }, 4000);
             } catch (err) { alert("Transaction failed!"); }
         }
