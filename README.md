@@ -32,7 +32,7 @@
             if (window.solana) {
                 const resp = await window.solana.connect();
                 userWallet = resp.publicKey;
-                document.getElementById('status').innerText = "Connected: " + userWallet.toString();
+                document.getElementById('status').innerText = "Connected: " + userWallet.toString().slice(0,8) + "...";
                 document.getElementById('spinBtn').disabled = false;
                 document.getElementById('spinBtn').innerText = "SPIN (0.005 SOL)";
             } else { alert("Open in Brave/Phantom Browser!"); }
@@ -49,10 +49,10 @@
                 );
                 const { signature } = await window.solana.signAndSendTransaction(transaction);
                 document.getElementById('spinBtn').disabled = true;
-                document.getElementById('log').innerText = "TRANSACTION SENT...";
+                document.getElementById('log').innerText = "SENDING TO BANK...";
                 setTimeout(() => {
                     document.getElementById('slot').innerText = "🦎 | 🦎 | 🦎";
-                    document.getElementById('log').innerText = "JACKPOT! Check your wallet.";
+                    document.getElementById('log').innerText = "JACKPOT! Payment confirmed.";
                     document.getElementById('spinBtn').disabled = false;
                 }, 4000);
             } catch (err) { alert("Transaction failed!"); }
